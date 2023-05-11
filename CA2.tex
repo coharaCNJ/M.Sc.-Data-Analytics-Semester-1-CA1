@@ -149,21 +149,11 @@ https://www.oecd.org/housing/policy-toolkit/data-dashboard/boosting-efficiency/
 
 https://www.linesight.com/insights/regional-report/europe-2021/
 
-https://pxdata.stat.fi/PxWeb/pxweb/en/StatFin/
+https://www.geeksforgeeks.org/newspaper-scraping-using-python-and-news-api/
 
-How to extract the API data:
-$https://www.scb.se/api_en/$
+https://towardsdatascience.com/web-scraping-news-articles-in-python-9dd605799558
 
-$https://github.com/kirajcg/pyscbwrapper/blob/master/pyscbwrapper_en.ipynb$
-
-*********
-Twitter
-*********
-HousingForAll (Ireland)
-homeless
-
-
-
+https://www.geeksforgeeks.org/newspaper-article-scraping-curation-python/
 \chapter{Materials and Methods}
 
 First steps were to determine and identify an appropriate Irish dataset under the theme of Constrction. There were two datasets found: A House Construction Cost Index from 1975 - 2017, and a social housing construction status reports from 2017 - 2021. Homelessness in Ireland is an issue of major significance and public importance at the moment. In fact, this is an issue across Europe to varying degrees, with the excpetion of Finland. It was decided to try to determine - from publicly available data - what Finland has done differently, the factors that may have impacted that, and to attempt a sentiment analysis around the topic in both Ireland and Finland. As such, the next step was to gather appropriate and complementary Finnish data. Statistics Finland’s free-of-charge statistical databases, Tilastokeskus was found, which included ... in JSON format, accessed via APIs.
@@ -197,6 +187,7 @@ First steps were to determine and identify an appropriate Irish dataset under th
 
 
 \subsection{Statistical analysis}
+ARIMA is an appropriate tool for modelling regular-interval, non-seasonal, time-series data, and may be used to predict data in the series into the future \citep{MSc}. Univariate analysis was employed here, in that only previous values in the time series were used to predict future ones. First an augmented Dickey-Fuller test was carried out to determine whether the data was stationary. This test showed that it was not stationary (p = 0.6, DF$\tau$ = -1.33), i.e. it had some time-dependent structure \citep{DF}. Autocorrelation and augmented Dickey-Fuller were used to determine the order of differencing \citep{Raval}, which was 1 (augmented Dickey-Fuller: p = 1.0 x $10^{-5}$, DF$\tau$ = -5.17), and the most significant degree of lag was determined from the autocorrelation plot (taken to be 50) \citep{Raval, Nadeem}. Maximising the goodness-of-fit of the ARIMA model is done by determining the best values for p, d and q and this was done by minimising the RMSE \citep{Raval, SaS} using cross-validation on a rolling basis, which ensures that no 'future' data is used in the training of the model \citep{SS, Hyn}. An order of differencing of 2 was later found to give better results (based on RMSE) than a value of 1.
 
 \begin{table}[h!]
 \centering
