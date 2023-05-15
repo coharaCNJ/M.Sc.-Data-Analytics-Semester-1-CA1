@@ -159,6 +159,8 @@ https://www.geeksforgeeks.org/newspaper-article-scraping-curation-python/
 First steps were to determine and identify an appropriate Irish dataset under the theme of Constrction. There were two datasets found: A House Construction Cost Index from 1975 - 2017, and a social housing construction status reports from 2017 - 2021. Homelessness in Ireland is an issue of major significance and public importance at the moment. In fact, this is an issue across Europe to varying degrees, with the excpetion of Finland. It was decided to try to determine - from publicly available data - what Finland has done differently, the factors that may have impacted that, and to attempt a sentiment analysis around the topic in both Ireland and Finland. As such, the next step was to gather appropriate and complementary Finnish data. Statistics Finland’s free-of-charge statistical databases, Tilastokeskus was found, which included ... in JSON format, accessed via APIs.
  
 \section{Data sources}
+Population statistics from 
+https://ec.europa.eu/eurostat/databrowser/view/TPS00001/default/table?lang=en
 
 \section{Programming}
 
@@ -189,27 +191,33 @@ First steps were to determine and identify an appropriate Irish dataset under th
 \subsection{Statistical analysis}
 ARIMA is an appropriate tool for modelling regular-interval, non-seasonal, time-series data, and may be used to predict data in the series into the future \citep{MSc}. Univariate analysis was employed here, in that only previous values in the time series were used to predict future ones. First an augmented Dickey-Fuller test was carried out to determine whether the data was stationary. This test showed that it was not stationary (p = 0.6, DF$\tau$ = -1.33), i.e. it had some time-dependent structure \citep{DF}. Autocorrelation and augmented Dickey-Fuller were used to determine the order of differencing \citep{Raval}, which was 1 (augmented Dickey-Fuller: p = 1.0 x $10^{-5}$, DF$\tau$ = -5.17), and the most significant degree of lag was determined from the autocorrelation plot (taken to be 50) \citep{Raval, Nadeem}. Maximising the goodness-of-fit of the ARIMA model is done by determining the best values for p, d and q and this was done by minimising the RMSE \citep{Raval, SaS} using cross-validation on a rolling basis, which ensures that no 'future' data is used in the training of the model \citep{SS, Hyn}. An order of differencing of 2 was later found to give better results (based on RMSE) than a value of 1.
 
+Ireland and Finland have roughly similar populations
+
+As there was only four years of Irish social housing construction data available, the irish and finnish cost indexes and construction activity could only be compared over 4 years, which is not a long enough dataset. The inferential analysis was still carried out, but in reality, any results based on such a small dataset would be meaningless. In oder to make valid compaisons acrss both countries the cost index and number of houses built were defined on a per-capita basis. A Shapiro-Wilk test showed that the data could be considered normally distributed (Irish cost index per Capita: W=0.870, pvalue=0.298, Irish houses built per Capita: W=0.827, pvalue=0.161, Finnish cost index per Capita: W=0.763, pvalue=0.051, Finnish houses built per Capita: W=0.839, pvalue=0.193).
+
 \begin{table}[h!]
 \centering
 \begin{tabular}{||c | c | c ||} 
  \hline
  Variable & W Test statistic & p-value \\ [0.0ex] 
  \hline\hline
- Median Age & 0.93 & 3.18 x 10\textsuperscript{-35} \\ 
+ Irish cost index per Capita & 0.870 & 0.298 \\ 
  \hline
- Median Income & 0.94 & 2.22 x 10\textsuperscript{-33} \\
+ Irish houses built per Capita & 0.827 & 0.161 \\
  \hline
- Median Price & 0.87 & 4.34 x 10\textsuperscript{-44} \\
+ Finnish cost index per Capita & 0.763 & 0.051 \\
  \hline
-  Volume of Sales & 0.86 & 0 \\ [0.0ex] 
+  Finnish houses built per Capita & 0.839 & 0.193 \\ [0.0ex] 
  \hline
 \end{tabular}
-\caption{Table template.}
+\caption{Results of Shapiro-Wilk tests for normality on the Irish and Finnish construction costs and housing units completed per-capita.}
 \label{table:1}
 \end{table}
-
-
+ 
 \section{Machine learning}
+The irish data was not split into test and train sets as the dataset was too small.
+
+In splitting the finnish data into test and train a split of 0.3 was taken, as the dataset was small.
 
 \subsection{Machine learning methods used}
 
