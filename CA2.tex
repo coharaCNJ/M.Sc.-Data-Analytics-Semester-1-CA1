@@ -134,16 +134,14 @@
 \tableofcontents
 \clearpage
 
-\section{brief}
-
 \chapter{Abstract}
 
 
 \chapter{Introduction}
-First steps were to determine and identify an appropriate Irish dataset under the theme of Constrction.
+First steps were to determine and identify an appropriate Irish dataset under the theme of Construction.
 There were two datasets found: A House Construction Cost Index from 1975 - 2017, and a social housing construction status reports from 2017 - 2021. Homelessness in Ireland is an issue of major significance and public importance at the moment. In fact, this is an issue across Europe to varying
 degrees, with the excpetion of Finland \citep{Ecoscope}. It was decided to try to explore - from publicly available
-data - what Finland has done differently, the factors that may have impacted that, and to attempt a sentiment analysis around the topic in both Ireland and Finland. As such, the next step was to gather appropriate and complementary Finnish data. Statistics Finland’s free-of-charge statistical databases, Tilastokeskus was found, which contains various construction related data (as well as data on many other aspects of Finnish society).
+data - what Finland has done differently, the factors that may have impacted that, and to attempt a sentiment analysis around the topic in both Ireland and Finland. As such, the next step was to gather appropriate and complementary Finnish data. Statistics Finland’s free-of-charge statistical databases, Tilastokeskus was found, which contains various construction related data (as well as data on many other aspects of Finnish society). Comparitive Finnish data was found to complement the Irish, and it was decided to analyse the difference between cost indices and residential housing comlpetion rate for the two countries.
 
 https://www.linesight.com/insights/regional-report/europe-2021/
 
@@ -152,6 +150,10 @@ https://www.geeksforgeeks.org/newspaper-scraping-using-python-and-news-api/
 https://towardsdatascience.com/web-scraping-news-articles-in-python-9dd605799558
 
 https://www.geeksforgeeks.org/newspaper-article-scraping-curation-python/
+
+The GitHub repository for this asseessment is
+\href{https://github.com/coharaCNJ/CCT_MSc_ContinuousAssessment2.git}{here}.
+
 \chapter{Materials and Methods}
 \section{Data sources}
 Social housing construction status reports for Ireland were taken for 2018 - 2021 from the publicly available Department of Housing, Local Government, and Heritage data on data.gov.ie \citep{Social} with the house construction cost index data for Ireland from the same source \citep{construction}. The Finnish data was taken from Tilastokesks, Statistics Finland’s free-of-charge statistical databases. Building and dwelling production \citep{12fy} and Building cost index \citep{11na} data were used. This varies from the Irish data in that it is residential building production in general, not social housing production exclusively, so the comparisons made between countries will be more general. However, it was deemed sufficient for this project to provide a demonstrable example. Finally, web scraping was carried out to gather newspaper article data for sentiment analysis. Articles from various newspapers were used; The Irish Independent \citep{TII}, The Irish Times \citep{TIT}, The Journal \citep{TJ}, The Helsinki Times \citep{THT}, YLE \citep{YLE}, the Guardian \citep{TG, TG2}, Politico \citep{P}, CBC \citep{CBC, CBC2}, The Toronto Star \citep{TS} and The Christian Science Monitor \citep{CS}. Finally population statistics came from eurostat \citep{eurostat}.
@@ -161,34 +163,118 @@ Data was gathered from three sources, as above. For the cost index and residenti
 \verb|(pandas.read_json)| \citep{read} and then to tabulate \verb|(pandas.json_normalize)| the data into a pandas dataframe format \citep{norm}.
 
 \subsection{Python libraries used}
-
+Some libraries were used extensively; Pandas, for working with dataframes \citep{pandas}, Seaborn and Matplotlib for data analysis and visualisation \citep{seaborn, matplotlib}, and NumPy for scientific and mathematical computing tasks \citep{numpy}, with others used as and when needed; the os library to manipulate file paths \citep{os}, json and requests to gather JSON format data from an API \citep{requests, json},  statsmodels.api, scipy.stats and statistics \citep{statsmodels, scipystats, statistics} allow the use of statistical functions and statistical models, textwrap \citep{textwrap} to manipulate graph axis labels, datetime to manipulate dates \citep{datetime}, PIL to save images \citep{pillow}, sklearn for machine learning algorithms \citep{sklearn}, dash and plotly-express for producing a dashboard \citep{dash, plotly}, and nltk for natural language processing and sentiment analysis \citep{nltk}.
 
 \section{Data preparation}
-\subsection{Cleaning the data}
+\subsection{Gathering and cleaning the data}
+Initial data processing was carried out in notebook 1: Gathering and Processing Raw Data. Missing values were not found to be an issue with the  Finnish costs or building completion data. Had there been missing Finnish data the for loops used to create the dataframes would have caught the mismatched list lengths. However, there were 6 missing values found in the Irish social housing completion data, all for Q4 2018, all subsequent to the Wicklow data for that quarter (the county dealt with last in the numerically ordered data) and prior to the data for the next quarter.  Therefore, as the missing data did not represent the entirety of a county or of a quarter, this data was dropped. There was no missing data in the Irish building cost index file, however there was one duplicate value found in this dataset, which was removed, and the dataset reindexed. In addition, while processing this data, it was ensured that all dates were numeric, to ensure that converting to datetime objects would be straightforward.
 
+In notebook 2: Statistical analysis, forecasting and Dashboard, the Month variable was made into a datetime object, in order to carry out forecasting on Irish construction costs for late 2017 until Q4 2021. This was to generate forecasted data that could be used alongside the building completion data for regression analysis. This forecasting and regression analysis are dealt with below.
 
 \subsection{Data visualisation}
+A simple dashboard dsiplaying the cost index and residential units built per capita was generated to quickly compare the differences between the countries. In this dashboard, the respective country's national colour was used to display the data for that country. Hovering over any bar of the chart displays the Country, year, value of interest and population. A still image is shown in figure \ref{fig:dashboard}.
 
 \begin{figure}[!ht]
 	\centering
 	\vspace{.4218cm}
-		\includegraphics[width=.8\linewidth]{characteristics_pairplot}	\captionsetup{justification=justified,width=1\linewidth}
-	\caption{Sample figure.}
-\label{fig:characteristics_pairplot}
+		\includegraphics[width=1\linewidth]{dashboard}	\captionsetup{justification=justified,width=1\linewidth}
+	\caption{A dashboard showing Irish and Finnish residential construction data and construction cost index data for four years.}
+\label{fig:dashboard}
 \end{figure}
 
 The colours chosen for the sentiment analysis visualisations were designed to reflect the traditional colours associated with political leanings, for example, red for left-leaning politics, magenta for centrist, and blue for conservative politics.
 
-\section{Statistics}
-\subsection{Python libraries}
+\section{Statistical analysis}
+\subsection{Forecasting: ARIMA model and time-series cross-validation}
+ARIMA is an appropriate tool for modelling regular-interval, non-seasonal, time-series data, and may be used to predict data in the series into the future \citep{MSc}. Univariate analysis was employed here to predict Irish construction costs, in that only previous values in the time series were used to predict future ones. First an augmented Dickey-Fuller test was carried out to determine whether the data was stationary. This test showed that it was not stationary (p = 0.6, DF$\tau$ = -1.33), i.e. it had some time-dependent structure \citep{DF}, as shown in figure \ref{fig:Irish_construction_costs_time_series}. In order to render the model stationary, it was necessary to determine the most appropriate values for three arguments to ARIMA: lag (p), differencing (d) and q (moving average window size).
 
+\begin{figure}[!ht]
+	\centering
+	\vspace{.4218cm}
+		\includegraphics[width=.8\linewidth]{Irish_construction_costs_time_series}	\captionsetup{justification=justified,width=1\linewidth}
+	\caption{Irish House Construction Cost Index Q1 1975 - Q3 2017.}
+\label{fig:Irish_construction_costs_time_series}
+\end{figure}
 
-\subsection{Statistical analysis}
-ARIMA is an appropriate tool for modelling regular-interval, non-seasonal, time-series data, and may be used to predict data in the series into the future \citep{MSc}. Univariate analysis was employed here, in that only previous values in the time series were used to predict future ones. First an augmented Dickey-Fuller test was carried out to determine whether the data was stationary. This test showed that it was not stationary (p = 0.6, DF$\tau$ = -1.33), i.e. it had some time-dependent structure \citep{DF}. Autocorrelation and augmented Dickey-Fuller were used to determine the order of differencing \citep{Raval}, which was 1 (augmented Dickey-Fuller: p = 1.0 x $10^{-5}$, DF$\tau$ = -5.17), and the most significant degree of lag was determined from the autocorrelation plot (taken to be 50) \citep{Raval, Nadeem}. Maximising the goodness-of-fit of the ARIMA model is done by determining the best values for p, d and q and this was done by minimising the RMSE \citep{Raval, SaS} using cross-validation on a rolling basis, which ensures that no 'future' data is used in the training of the model \citep{SS, Hyn}. An order of differencing of 2 was later found to give better results (based on RMSE) than a value of 1.
+As a first pass, autocorrelation and augmented Dickey-Fuller were used to determine the order of differencing (d) \citep{Raval}, which was 1 (augmented Dickey-Fuller: p = 1.0 x $10^{-5}$, DF$\tau$ = -5.17), and the most significant degree of lag (p) was determined from the autocorrelation plot (taken to be 50, as shown in \ref{fig:autocorrelation}) \citep{Raval, Nadeem}. Maximising the goodness-of-fit of the ARIMA model was done by determining the best values for p, d and q and this was done by minimising the RMSE \citep{Raval, SaS} using cross-validation on a rolling basis, which ensures that no 'future' data is used in the training of the model \citep{SS, Hyn}. An order of differencing of 2 was later found to give better results (based on time-series cross-validation and RMSE results, as shown in table \ref{table:1}) than a value of 1, while the moving average window was left at default 0.
 
-Ireland and Finland have roughly similar populations \citep{eurostat} but to ensure that the 
+\begin{figure}[!ht]
+	\centering
+	\vspace{.4218cm}
+		\includegraphics[width=.7\linewidth]{autocorrelation}	\captionsetup{justification=justified,width=1\linewidth}
+	\caption{Autocorrelation plot of the Irish house construction cost index over time.}
+\label{fig:autocorrelation}
+\end{figure}
 
-As there was only four years of Irish social housing construction data available, the irish and finnish cost indexes and construction activity could only be compared over 4 years, which is not a long enough dataset. The inferential analysis was still carried out, but in reality, any results based on such a small dataset would be meaningless. In order to make valid comparisons across both countries the cost index and number of houses built were defined on a per-capita basis. A Shapiro-Wilk test showed that the data could be considered normally distributed (Irish cost index per Capita: W=0.870, pvalue=0.298, Irish houses built per Capita: W=0.827, pvalue=0.161, Finnish cost index per Capita: W=0.763, pvalue=0.051, Finnish houses built per Capita: W=0.839, pvalue=0.193).
+\begin{table}[h!]
+\centering
+\begin{tabular}{||c | c | c | c ||} 
+ \hline
+ p & d & q & RMSE \\ [0.0ex] 
+ \hline\hline
+ 50 & 1 & 0 & 8.5 \\ 
+ \hline
+ 50 & 1 & 1 & 8.7 \\
+ \hline
+ 50 & 2 & 0 & 8 \\
+ \hline
+  50 & 2 & 1 & 9 \\
+  \hline
+  30 & 2 & 0 & 9.1 \\
+  \hline
+  40 & 2 & 0 & 11.2 \\ [0.0ex] 
+ \hline
+\end{tabular}
+\caption{Results of time-series cross-validation on an Irish construction costs ARIMA model.}
+\label{table:1}
+\end{table}
+
+Once the most appropriate parameters had been determined the ARIMA model was trained and tested on historical data in order to determine how well the forecasting was able to predict future costs. It was found that the forecast was only accurate for a short period of time, with the forecast starting to deviate after only a year or 18 months, as shown in figure \ref{fig:forecast}. Four years and four months of data (Aug. 2017 - Dec. 2021) were required to match the time series available in the Irish house construction dataset, so the ARIMA model was used to forecast this. The result is show in figure \ref{fig:future}. This forecast should be used with cauion, as the ARIMA model was shown above not to be relaible over longer prediction timeframes.
+
+\begin{figure}[!ht]
+	\centering
+	\vspace{.4218cm}
+		\includegraphics[width=.8\linewidth]{forecast}	\captionsetup{justification=justified,width=1\linewidth}
+	\caption{Actual and predicted cost index for Feb. 2003 - Aug. 2017.}
+\label{fig:forecast}
+\end{figure}
+
+\begin{figure}[!ht]
+	\centering
+	\vspace{.4218cm}
+		\includegraphics[width=.8\linewidth]{Future}	\captionsetup{justification=justified,width=1\linewidth}
+	\caption{Irish House Construction Cost Index Q1 1975 - Q4 2021.}
+\label{fig:future}
+\end{figure}
+
+Once the forecasted cost index data was in place, linear regression could be carried out on the Irish and Finnish data. In preparation for this the Irish costs data was grouped by quarter (with the median used as central tendency as the data was not normally distributed (Shapiro-Wilk W = 0.90, p = 5.11e-19), as shown in \ref{fig:costs_qq}. The Irish cost and building completion data does appear correlated, as shown in figure \ref{fig:irish_pairplot}, though the Finnish equivalent appears less so (figure \ref{fig:finnish_pairplot}). This regression analysis is dealt with later.
+
+\begin{figure}[!ht]
+	\centering
+	\vspace{.4218cm}
+		\includegraphics[width=.6\linewidth]{costs_qq}	\captionsetup{justification=justified,width=1\linewidth}
+	\caption{A Q-Q plot for the Irish cost index data.}
+\label{fig:costs_qq}
+\end{figure}
+
+\begin{figure}[!ht]
+	\centering
+	\vspace{.4218cm}
+		\includegraphics[width=.6\linewidth]{irish_pairplot}	\captionsetup{justification=justified,width=1\linewidth}
+	\caption{Pairplot of Irish cost and completed buildings data.}
+\label{fig:irish_pairplot}
+\end{figure}
+
+\begin{figure}[!ht]
+	\centering
+	\vspace{.4218cm}
+		\includegraphics[width=1\linewidth]{finnish_pairplot}	\captionsetup{justification=justified,width=1\linewidth}
+	\caption{Pairplot of Finnish cost and completed buildings data.}
+\label{fig:finnish_pairplot}
+\end{figure}
+
+\subsection{Inferential statistics}
+Some comparative tests were carried out of the Irish and Finnish cost index and building completion data. Ireland and Finland have roughly similar populations \citep{eurostat} but to ensure that the comparisons were valid, the cost indexes and building completion rate were normalised per-capita. As there was only four years of Irish social housing construction data available, the Irish and Finnish cost indexes and construction activity could only be compared over 4 years. Although this is not a long enough dataset, the inferential analysis was still carried out, but in reality, any results based on such a small dataset would not be meaningful. A series of Shapiro-Wilk tests (table \ref{table:2}) on these four years datasets showed that the data could be considered normally distributed (Irish cost index per Capita: W=0.870, pvalue=0.298, Irish houses built per Capita: W=0.827, pvalue=0.161, Finnish cost index per Capita: W=0.763, pvalue=0.051, Finnish houses built per Capita: W=0.839, pvalue=0.193).
 
 \begin{table}[h!]
 \centering
@@ -206,21 +292,23 @@ As there was only four years of Irish social housing construction data available
  \hline
 \end{tabular}
 \caption{Results of Shapiro-Wilk tests for normality on the Irish and Finnish construction costs and housing units completed per-capita.}
-\label{table:1}
+\label{table:2}
 \end{table}
  
-\section{Machine learning}
-The irish data was not split into test and train sets as the dataset was too small.
+Next Levene's test for homogeneity of variances was used to compare the variance of the Irish and Finnish data, to determine whether a parametric or non-parametric test would be most appropriate in testing whether the samples can be considered to come from the same population. For the residentail building completion rate the null hypothesis was rejected (W = 116.09, p = 3.78e-05), but for the cost index data it was retained (W = 0.90, p = 0.38) indicating that, for the cost index data a parametric test is appropriate (data is normally dsitributed and the samples have equal varianes) but that for the building completion data a non-parametric test would be most appropriate (as the variances are not equal). As such the cost indices were compared using a t-test, and found not to belong to the same population (t = -37.24, p = 2.50e-08) while the building completion rate was compared using the non-parametric Mann-Whitney U test, and these samples were also found not to belong to the same population (U = 0.0, p = 0.029).
 
+\section{Linear regression: cost index vs residential units built}
 In splitting the finnish data into test and train a split of 0.3 was taken, as the dataset was small, and it was important to have sufficient data to test with. However, with only ... records, the dataset was too small for meaningful analysis and in practice ...
 
-Five newspaper articles on the subject of Finland's approach to the homelessness crises were compared
+The irish data was not split into test and train sets as the dataset was too small.
+
+\section{Sentiment analysis of newspaper articles}
+Ten newspaper articles on the subject of Finland's approach to the homelessness crises were analysed for sentiment and compared. 
 
 Media Bias / Fact Check was used to determine the political leanings of the various media outlets used \citep{bias}.
 
-\subsection{Machine learning methods used}
-
 \chapter{Results}
+Ireland's building cost index was consistently higher than Finland's across the four years compared, and indeed the cost index data could not be considered to have been drawn from the same population. This is an interesting difference between the countries, as it might be considered that cost index would play a role in driving the rate of completion of residential buildings. However, the relation ship between these variables was not 
 
 \chapter{Conclusion}
 
