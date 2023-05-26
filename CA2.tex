@@ -135,24 +135,18 @@
 \clearpage
 
 \chapter{Abstract}
-
+Residential costs indices and residential building completion rates were examined for Ireland and Finland with a view to determining similarities and differences between the countries in the context of the homlessness response of the two nations. Both cost index and building completion rate are more consistent over time for Finland, while social housing completion rate is strongly positively correlated with time and with construction cost index for Ireland. This suggests that there are varying national policy forces at play in both countries, that have driven, and continue to drive, the housing ecosystem of the two countries, and which have allowed Finland to drive its homelessness to the lowest level in Europe, using a 'Housing First' approach.
 
 \chapter{Introduction}
 First steps were to determine and identify an appropriate Irish dataset under the theme of Construction.
 There were two datasets found: A House Construction Cost Index from 1975 - 2017, and a social housing construction status reports from 2017 - 2021. Homelessness in Ireland is an issue of major significance and public importance at the moment. In fact, this is an issue across Europe to varying
 degrees, with the excpetion of Finland \citep{Ecoscope}. It was decided to try to explore - from publicly available
-data - what Finland has done differently, the factors that may have impacted that, and to attempt a sentiment analysis around the topic in both Ireland and Finland. As such, the next step was to gather appropriate and complementary Finnish data. Statistics Finland’s free-of-charge statistical databases, Tilastokeskus was found, which contains various construction related data (as well as data on many other aspects of Finnish society). Comparitive Finnish data was found to complement the Irish, and it was decided to analyse the difference between cost indices and residential housing comlpetion rate for the two countries.
-
-https://www.linesight.com/insights/regional-report/europe-2021/
-
-https://www.geeksforgeeks.org/newspaper-scraping-using-python-and-news-api/
-
-https://towardsdatascience.com/web-scraping-news-articles-in-python-9dd605799558
-
-https://www.geeksforgeeks.org/newspaper-article-scraping-curation-python/
+data - what Finland has done differently, the factors that may have impacted that, and to attempt a sentiment analysis around the topic in both Ireland and Finland. As such, the next step was to gather appropriate and complementary Finnish data. Statistics Finland’s free-of-charge statistical databases, Tilastokeskus was found, which contains various construction related data (as well as data on many other aspects of Finnish society). Comparative Finnish data was found to complement the Irish, and it was decided to analyse the difference between cost indices and residential housing completion rate for the two countries, and to carry out a sentiment analysis of newspaper articles on the subject of Finland's 'Housing First' approach to homelessness.
 
 The GitHub repository for this asseessment is
 \href{https://github.com/coharaCNJ/CCT_MSc_ContinuousAssessment2.git}{here}.
+
+Word count is approx. 2,800.
 
 \chapter{Materials and Methods}
 \section{Data sources}
@@ -163,16 +157,16 @@ Data was gathered from three sources, as above. For the cost index and residenti
 \verb|(pandas.read_json)| \citep{read} and then to tabulate \verb|(pandas.json_normalize)| the data into a pandas dataframe format \citep{norm}.
 
 \subsection{Python libraries used}
-Some libraries were used extensively; Pandas, for working with dataframes \citep{pandas}, Seaborn and Matplotlib for data analysis and visualisation \citep{seaborn, matplotlib}, and NumPy for scientific and mathematical computing tasks \citep{numpy}, with others used as and when needed; the os library to manipulate file paths \citep{os}, json and requests to gather JSON format data from an API \citep{requests, json},  statsmodels.api, scipy.stats and statistics \citep{statsmodels, scipystats, statistics} allow the use of statistical functions and statistical models, textwrap \citep{textwrap} to manipulate graph axis labels, datetime to manipulate dates \citep{datetime}, PIL to save images \citep{pillow}, sklearn for machine learning algorithms \citep{sklearn}, dash and plotly-express for producing a dashboard \citep{dash, plotly}, and nltk for natural language processing and sentiment analysis \citep{nltk}.
+Some libraries were used extensively; Pandas, for working with dataframes \citep{pandas}, Seaborn and Matplotlib for data analysis and visualisation \citep{seaborn, matplotlib}, and NumPy for scientific and mathematical computing tasks \citep{numpy}, with others used as and when needed; the os library to manipulate file paths \citep{os}, json and requests to gather JSON format data from an API \citep{requests, json},  statsmodels.api, scipy.stats and statistics \citep{statsmodels, scipystats, statistics} allow the use of statistical functions and statistical models, textwrap \citep{textwrap} to manipulate graph axis labels, datetime to manipulate dates \citep{datetime}, sklearn for machine learning algorithms \citep{sklearn}, dash and plotly-express for producing a dashboard \citep{dash, plotly}, nltk for natural language processing and sentiment analysis \citep{nltk}, and newspaper3k for newspaper article scraping \citep{newspaper3k, gfgnews}.
 
 \section{Data preparation}
 \subsection{Gathering and cleaning the data}
 Initial data processing was carried out in notebook 1: Gathering and Processing Raw Data. Missing values were not found to be an issue with the  Finnish costs or building completion data. Had there been missing Finnish data the for loops used to create the dataframes would have caught the mismatched list lengths. However, there were 6 missing values found in the Irish social housing completion data, all for Q4 2018, all subsequent to the Wicklow data for that quarter (the county dealt with last in the numerically ordered data) and prior to the data for the next quarter.  Therefore, as the missing data did not represent the entirety of a county or of a quarter, this data was dropped. There was no missing data in the Irish building cost index file, however there was one duplicate value found in this dataset, which was removed, and the dataset reindexed. In addition, while processing this data, it was ensured that all dates were numeric, to ensure that converting to datetime objects would be straightforward.
 
-In notebook 2: Statistical analysis, forecasting and Dashboard, the Month variable was made into a datetime object, in order to carry out forecasting on Irish construction costs for late 2017 until Q4 2021. This was to generate forecasted data that could be used alongside the building completion data for regression analysis. This forecasting and regression analysis are dealt with below.
+In notebook 2: Statistical analysis, forecasting and Dashboard, the Month variable was made into a datetime object, in order to carry out forecasting on Irish construction costs for late 2017 until Q4 2021. This was to generate forecasted data that could be used alongside the building completion data for regression analysis. This forecasting and regression analysis are dealt with in their own sections below. Finally, in notebook 3: Regression models, feature scaling was carried out as the building completion rate was many orders of magnitude greater than the year variable in the analysis.
 
 \subsection{Data visualisation}
-A simple dashboard dsiplaying the cost index and residential units built per capita was generated to quickly compare the differences between the countries. In this dashboard, the respective country's national colour was used to display the data for that country. Hovering over any bar of the chart displays the Country, year, value of interest and population. A still image is shown in figure \ref{fig:dashboard}.
+A simple dashboard dsiplaying the cost index and residential units built per capita was generated to quickly compare the differences between the countries. In this dashboard, the respective country's national colour was used to display the data for that country (blue for Finland and green for Ireland). Hovering over any bar of the chart displays the Country, year, value of interest (cost index or building completion rate per capita) and population. A still image of this is shown in figure \ref{fig:dashboard}.
 
 \begin{figure}[!ht]
 	\centering
@@ -182,7 +176,7 @@ A simple dashboard dsiplaying the cost index and residential units built per cap
 \label{fig:dashboard}
 \end{figure}
 
-The colours chosen for the sentiment analysis visualisations were designed to reflect the traditional colours associated with political leanings, for example, red for left-leaning politics, magenta for centrist, and blue for conservative politics.
+The colours chosen for the sentiment analysis visualisations were designed to reflect the traditional colours associated with political leanings, for example, red for left-leaning politics, magenta for centrist, and blue for conservative politics (figure \ref{fig:pol_bias}), or the national colours of the country in question. However there was significat overlap in national colour (many countries favour red, blue and white), so purple was chosen for the US and pink for Canada, along with more traditional green for Ireland, blue for finland and red for the UK.
 
 \section{Statistical analysis}
 \subsection{Forecasting: ARIMA model and time-series cross-validation}
@@ -191,7 +185,7 @@ ARIMA is an appropriate tool for modelling regular-interval, non-seasonal, time-
 \begin{figure}[!ht]
 	\centering
 	\vspace{.4218cm}
-		\includegraphics[width=.8\linewidth]{Irish_construction_costs_time_series}	\captionsetup{justification=justified,width=1\linewidth}
+		\includegraphics[width=.6\linewidth]{Irish_construction_costs_time_series}	\captionsetup{justification=justified,width=1\linewidth}
 	\caption{Irish House Construction Cost Index Q1 1975 - Q3 2017.}
 \label{fig:Irish_construction_costs_time_series}
 \end{figure}
@@ -201,7 +195,7 @@ As a first pass, autocorrelation and augmented Dickey-Fuller were used to determ
 \begin{figure}[!ht]
 	\centering
 	\vspace{.4218cm}
-		\includegraphics[width=.7\linewidth]{autocorrelation}	\captionsetup{justification=justified,width=1\linewidth}
+		\includegraphics[width=.6\linewidth]{autocorrelation}	\captionsetup{justification=justified,width=1\linewidth}
 	\caption{Autocorrelation plot of the Irish house construction cost index over time.}
 \label{fig:autocorrelation}
 \end{figure}
@@ -234,7 +228,7 @@ Once the most appropriate parameters had been determined the ARIMA model was tra
 \begin{figure}[!ht]
 	\centering
 	\vspace{.4218cm}
-		\includegraphics[width=.8\linewidth]{forecast}	\captionsetup{justification=justified,width=1\linewidth}
+		\includegraphics[width=.6\linewidth]{forecast}	\captionsetup{justification=justified,width=1\linewidth}
 	\caption{Actual and predicted cost index for Feb. 2003 - Aug. 2017.}
 \label{fig:forecast}
 \end{figure}
@@ -242,7 +236,7 @@ Once the most appropriate parameters had been determined the ARIMA model was tra
 \begin{figure}[!ht]
 	\centering
 	\vspace{.4218cm}
-		\includegraphics[width=.8\linewidth]{Future}	\captionsetup{justification=justified,width=1\linewidth}
+		\includegraphics[width=.6\linewidth]{Future}	\captionsetup{justification=justified,width=1\linewidth}
 	\caption{Irish House Construction Cost Index Q1 1975 - Q4 2021.}
 \label{fig:future}
 \end{figure}
@@ -297,21 +291,76 @@ Some comparative tests were carried out of the Irish and Finnish cost index and 
  
 Next Levene's test for homogeneity of variances was used to compare the variance of the Irish and Finnish data, to determine whether a parametric or non-parametric test would be most appropriate in testing whether the samples can be considered to come from the same population. For the residentail building completion rate the null hypothesis was rejected (W = 116.09, p = 3.78e-05), but for the cost index data it was retained (W = 0.90, p = 0.38) indicating that, for the cost index data a parametric test is appropriate (data is normally dsitributed and the samples have equal varianes) but that for the building completion data a non-parametric test would be most appropriate (as the variances are not equal). As such the cost indices were compared using a t-test, and found not to belong to the same population (t = -37.24, p = 2.50e-08) while the building completion rate was compared using the non-parametric Mann-Whitney U test, and these samples were also found not to belong to the same population (U = 0.0, p = 0.029).
 
-\section{Linear regression: cost index vs residential units built}
-In splitting the finnish data into test and train a split of 0.3 was taken, as the dataset was small, and it was important to have sufficient data to test with. However, with only ... records, the dataset was too small for meaningful analysis and in practice ...
+In examining the relationship between the cost index and the building completion rate Pearson's correlation coefficient was used to check for correlation, with a correlation of +0.99 returned for the Irish data, and +0.56 returned for the Finnish. When checking the impact of time, building completion is also heavily correlated with year for Ireland (r = +0.96), though less so for Finland (r = +0.60).
 
-The irish data was not split into test and train sets as the dataset was too small.
+\section{Linear regression: cost index vs residential units built}
+This analysis is dealt with in notebook 3: Regression models. Since the dataset was small, when splitting the Finnish data  into test and train a split of 0.3 was taken. This was done in order to have sufficient data to test with. However, with only 28 records, the dataset was too small for meaningful analysis and in practice more data would be required. Similarly the irish dataset was small, and, as a result, was not split into test and train sets. A simple linear regression model was fit to this data.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{||c | c | c ||} 
+ \hline
+ Model & Train & Test \\ [0.0ex] 
+ \hline\hline
+ Simple linear regression & 0.38 & -0.18 \\ 
+ \hline
+ Ridge Regression with GridSearchCV & 0.38 & -0.06 \\
+ \hline
+ Lasso regression with GridSearchCV & 0.37 & 0.16 \\
+ \hline
+ Decision Tree regression & 1.00 & 0.37 \\
+ \hline
+  Random Forest regression & 0.94 & 0.61 \\ [0.0ex] 
+ \hline
+\end{tabular}
+\caption{R\textsuperscript{2} for various regression models of residential building completion rate vs year for Finnish data.}
+\label{table:3}
+\end{table}
+
+As shown in figure \ref{fig:simple_linear} and as can be seen from the results in table \ref{table:3} the simple linear model performed very poorly, while the random forest regression model behaved best (figure \ref{fig:random_forest}).
+
+\begin{figure}[!ht]
+	\centering
+	\vspace{.4218cm}
+		\includegraphics[width=.8\linewidth]{simple_linear}	\captionsetup{justification=justified,width=1\linewidth}
+	\caption{Linear Regression: Finnish total buildings completed vs Year.}
+\label{fig:simple_linear}
+\end{figure}
+
+\begin{figure}[!ht]
+	\centering
+	\vspace{.4218cm}
+		\includegraphics[width=.8\linewidth]{random_forest}	\captionsetup{justification=justified,width=1\linewidth}
+	\caption{Random Forest regression: Finnish total buildings completed vs cost index of construction.}
+\label{fig:random_forest}
+\end{figure}
 
 \section{Sentiment analysis of newspaper articles}
-Ten newspaper articles on the subject of Finland's approach to the homelessness crises were analysed for sentiment and compared. 
+Ten newspaper articles on the subject of Finland's approach to the homelessness crises were analysed for sentiment and compared. This was carried out in notebook 4: Sentiment analysis on Irish and Finnish newspaper aticles regarding homelessness. Newspaper articles were found by searching national newspaper in Ireland and Finland for articles about Finland's response to homelessness, and by using a Google search with the same keywords. Each article was convered to lowercase, stemmed, and all non-alphabet characters were removed, before sentiment analysis was carried out. Media Bias / Fact Check was used to determine the political leanings of the various media outlets used \citep{bias}, in order to examine whether the sentiment was impacted by political bias. A lot more data of sentiment from articles would be required in order to carry out any machine learning, such as supervised naïve bayes. With the data available there is no clear trends in evidence for either country or political leaning, as shown in figures \ref{fig:country} and \ref{fig:pol_bias}.
 
-Media Bias / Fact Check was used to determine the political leanings of the various media outlets used \citep{bias}.
+\begin{figure}[!ht]
+	\centering
+	\vspace{.4218cm}
+		\includegraphics[width=1\linewidth]{country}	\captionsetup{justification=justified,width=1\linewidth}
+	\caption{Country based sentiment polarity for various newspapers with subject Finland's response to homelessness.}
+\label{fig:country}
+\end{figure}
+
+\begin{figure}[!ht]
+	\centering
+	\vspace{.4218cm}
+		\includegraphics[width=1\linewidth]{pol_bias}	\captionsetup{justification=justified,width=1\linewidth}
+	\caption{Sentiment polarity and political bias for various newspapers with subject Finland's response to homelessness.}
+\label{fig:pol_bias}
+\end{figure}
 
 \chapter{Results}
-Ireland's building cost index was consistently higher than Finland's across the four years compared, and indeed the cost index data could not be considered to have been drawn from the same population. This is an interesting difference between the countries, as it might be considered that cost index would play a role in driving the rate of completion of residential buildings. However, the relation ship between these variables was not 
+Ireland's building cost index was consistently higher than Finland's across the four years compared, and indeed the cost index data could not be considered to have been drawn from the same population. This suggets that forces at a national level were impacting the cost index more than european or global level forces. Similarly for the building completion rate (although it must be remembered that the Irish data is exclusively social housing completion data, while the Finnish data is for all residential buildings), the Irish and Finnish data could not be considered to be samples drawn from the same population. Figure \ref{fig:dashboard} shows that the Finnish rate of residential building completion is more consistent across years than the Irish, and correlation tests showed that price and building completion rate were less closely correlated than they were for the Irish. However, the Irish building completion rate increases with increasing costs, suggesting counfounding variables. Indeed, the building completion rate is heavily correlated with time, though time is a stronger predictor of building completion rate than costs in Finland, while the opposite is true of Ireland. The regression analysis also suggests that Finland's building completion activity is less dependent on costs or time than the Irish, and suggests that the activity may be driven by other factors, such as national policy, or housing requirement needs. On the other hand, since Irish social housing completion is positively correlated with costs, this may suggest that Ireland's building activity is being driven by other factors, such as requirement, and that it is requirement - as well as inflation - that is driving cost, rather than the other way around.
+
+A country's media response to a subject could indicate - or influence - how likely the general population would be to support the rollout of a similar programme in their own country. In this case a positive response to Finland's somewhat radical 'Housing First' approach to homelessness might indicate how receptve Ireland's population would be to something similar. In Ireland's case the issue is compounded by a lack of housing in general, and a need for sustained residential construction activity in order to alleviate it. As such it is interesting that Finland's rate of residential building completion is consistent over time (figure \ref{fig:dashboard}) while Ireland's varies with time (and not always positively). However, Finland's building completion rate is consistently lower than Ireland's - even though Finland's data is for all residential buildings - implying, given that Finland has a very low homelessness rate, that the residential unit completion rate has not lagged Finland's population growth historically, while Ireland's has. Under these circumstances the Irish public may be less open to a 'Housing First' approach than the Finnish public, as there are fewer houses to go around, although more data would be needed to help determine this. With the limited data available, it can be said that the sentiment polarity score assigned to both Irish and both Finnish articles on the subject were mildly positive (Irish: 0.08 and 0.09, Finnish: 0.17, 0.04).
 
 \chapter{Conclusion}
-
+It was found that social housing completion rate is strongly positively correlated with time and with construction cost index for Ireland, but less so for Finland, with both costs and building completion rate being more consistent over time for the latter country. This may indicate that there are national forces and policies driving these factors, which has given rise to a more fit-for-purpose housing infrastructure than exists for Ireland and facilitates the 'Housing First' policy that Finland has enacted.
 
 \printbibliography
  
